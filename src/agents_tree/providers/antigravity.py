@@ -26,12 +26,14 @@ from agents_tree.model import (DONE, FAILED, INACTIVE, RUNNING, STALE, WAITING, 
 def _get_antigravity_dir() -> Path:
     if os.environ.get("ANTIGRAVITY_HOME"):
         return Path(os.environ["ANTIGRAVITY_HOME"])
-    for cand in (
-        Path.home() / ".gemini" / "antigravity-cli",
-        Path.home() / ".gemini" / "antigravity",
-    ):
-        if (cand / "brain").is_dir():
-            return cand
+    candidates = [
+        cand for cand in (
+            Path.home() / ".gemini" / "antigravity",
+            Path.home() / ".gemini" / "antigravity-cli",
+        ) if (cand / "brain").is_dir()
+    ]
+    if candidates:
+        return max(candidates, key=lambda c: (c / "brain").stat().st_mtime)
     return Path.home() / ".gemini" / "antigravity"
 
 
